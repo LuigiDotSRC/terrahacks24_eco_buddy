@@ -4,7 +4,9 @@ from openaicv import get_image_data
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS to allow requests from specific origins
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Adjust origins as needed
 
 @app.route("/api/classify_image", methods=["POST"])
 def classify_image():
@@ -20,10 +22,9 @@ def classify_image():
 
     # Check if the directory exists
     if not os.path.exists(dir_path):
-        print("DIR DOES NOT EXIST!")
         os.makedirs(dir_path, exist_ok=True)
 
-    file_location = f'./uploads/{file.filename}'
+    file_location = os.path.join(dir_path, file.filename)
     file.save(file_location)
 
     response = get_image_data(file_location)

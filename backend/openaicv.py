@@ -23,7 +23,7 @@ def get_image_data(image_path):
         "Authorization": f"Bearer {api_key}"
     }
 
-    prompt = "Find the main focus item of the image. Does the item go in the trash, recycling, or compost? RESPOND WITH: <ITEM NAME>: TRASH, RECYCLE, COMPOST"
+    prompt = "Find the main focus item of the image. Does the item go in the trash, recycling, or compost? RESPOND WITH: <ITEM NAME>: TRASH, RECYCLE, COMPOST. RESPOND WITH: NONE if you cant find the focus"
 
     payload = {
         "model": "gpt-4o-mini",
