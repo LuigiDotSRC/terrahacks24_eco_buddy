@@ -1,55 +1,33 @@
-import base64
-import requests
-from dotenv import load_dotenv
-import os 
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from openaicv import get_image_data
+import os
 
-load_dotenv()
+app = Flask(__name__)
+CORS(app)
 
-# OpenAI API Key
-api_key = os.getenv("API_KEY")
+@app.route("/api/classify_image", methods=["POST"])
+def classify_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
 
-# Function to encode the image
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')  
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
 
-def get_image_data():
-    # Path to your image
-    image_path = "rotten_apple.jpg"
+    # Path to the directory
+    dir_path = './uploads/'
 
-    # Getting the base64 string
-    base64_image = encode_image(image_path)
+    # Check if the directory exists
+    if not os.path.exists(dir_path):
+        print("DIR DOES NOT EXIST!")
+        os.makedirs(dir_path, exist_ok=True)
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
+    file_location = f'./uploads/{file.filename}'
+    file.save(file_location)
 
-    prompt = "Find the main focus item of the image. Does the item go in the trash, recycling, or compost? RESPOND WITH: <ITEM NAME>: TRASH, RECYCLE, COMPOST"
+    response = get_image_data(file_location)
+    return jsonify({'message': response}), 200 
 
-    payload = {
-        "model": "gpt-4o-mini",
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": prompt
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        }
-                    }
-                ]
-            }
-        ],
-        "max_tokens": 300
-    }
-
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)   
-    return response.json()['choices'][0]['message']['content']
-
-print(get_image_data())
+if __name__ == "__main__":
+    app.run(debug=True)
