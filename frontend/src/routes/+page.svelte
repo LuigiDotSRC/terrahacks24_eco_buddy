@@ -1,5 +1,7 @@
 <script>
-    import CameraComponent from "../lib/CameraComponent.svelte";
+  import CameraComponent from "../lib/CameraComponent.svelte";
 </script>
 
-<CameraComponent/>
+<div class="my-20">
+  <CameraComponent/>
+</div>
